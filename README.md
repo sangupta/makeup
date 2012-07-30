@@ -3,6 +3,19 @@ makeup
 
 `makeup` is an HTML generation framework that help generate HTML from `markdown` format, and `Apache Velocity` templates for the least. It aims to be able to generate consistent HTML from various markup/templating formats, like Wiki, Textile, Liquid Markup etc.
 
+Continuous Integration
+----------------------
+The library is continuously integrated and unit tested using the *Travis CI system.
+
+Current status of branch `MASTER`: [![Build Status](https://secure.travis-ci.org/sangupta/makeup.png?branch=master)](http://travis-ci.org/sangupta/makeup)
+
+The library is tested against
+
+* Oracle JDK 7
+* Oracle JDK 6
+* Open JDK 7
+* Open JDK 6
+
 Versioning
 ----------
 
