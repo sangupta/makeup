@@ -21,14 +21,13 @@
 
 package com.sangupta.makeup.converters.markdown;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import org.pegdown.Extensions;
-import org.pegdown.PegDownProcessor;
-
 import com.sangupta.makeup.converters.Converter;
+import com.sangupta.nutz.MarkdownProcessor;
 
 /**
  * Converts markdown format to HTML
@@ -38,10 +37,8 @@ import com.sangupta.makeup.converters.Converter;
  */
 public class MarkdownConverter implements Converter {
 	
-	public static PegDownProcessor pegDownProcessor;
+	private MarkdownProcessor processor = new MarkdownProcessor();
 	
-	public static PegDownProcessor pegDownNonHardWrapProcessor;
-
 	/**
 	 * 
 	 *
@@ -61,25 +58,25 @@ public class MarkdownConverter implements Converter {
 	 * @return
 	 */
 	public String convert(String content) {
-		if(pegDownProcessor == null || pegDownNonHardWrapProcessor == null) {
-			initialize();
+		try {
+			return this.processor.toHtml(content);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-
-		return pegDownProcessor.markdownToHtml(content);
+		
+		return null;
 	}
 
 	@Override
 	public String convert(String content, Properties pageProperties) {
-		if(pegDownProcessor == null || pegDownNonHardWrapProcessor == null) {
-			initialize();
+		try {
+			return this.processor.toHtml(content);
+		} catch(IOException e) {
+			e.printStackTrace();
 		}
 		
-		String hardwrap = pageProperties.getProperty("hardwrap");
-		if("true".equalsIgnoreCase(hardwrap)) {
-			return pegDownNonHardWrapProcessor.markdownToHtml(content);
-		}
-
-		return pegDownProcessor.markdownToHtml(content);
+		return null;
 	}
 
 	/**
@@ -95,19 +92,6 @@ public class MarkdownConverter implements Converter {
 		extensions.add(".markdown");
 		
 		return extensions;
-	}
-
-	/**
-	 * Initialization function
-	 */
-	private synchronized void initialize() {
-		if(pegDownProcessor == null) {
-			pegDownProcessor = new PegDownProcessor(Extensions.ALL ^ Extensions.HARDWRAPS);
-		}
-		
-		if(pegDownNonHardWrapProcessor == null) {
-			pegDownNonHardWrapProcessor = new PegDownProcessor(Extensions.ALL);
-		}
 	}
 
 }

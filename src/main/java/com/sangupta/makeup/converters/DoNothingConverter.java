@@ -21,22 +21,40 @@
 
 package com.sangupta.makeup.converters;
 
+import java.util.List;
+import java.util.Properties;
+
 /**
- * Enumeration that defines various types of converters available.
+ * Converter that does nothing. Used when we cannot detect the
+ * type of the input file.
  * 
  * @author sangupta
- * @since 0.1
+ * @since 0.1.0
  */
-public enum ConverterType {
-	
+public final class DoNothingConverter implements Converter {
+
 	/**
-	 * Converter that does nothing and returns the text as such
+	 * 
+	 *
+	 * @see com.sangupta.makeup.converters.Converter#getName()
 	 */
-	DoNothing,
-	
+	@Override
+	public String getName() {
+		return "Do Nothing";
+	}
+
+	@Override
+	public final String convert(String content, Properties pageProperties) {
+		return content;
+	}
+
 	/**
-	 * Convert from Markdown format
+	 *
+	 * @see com.sangupta.makeup.converters.Converter#getProbableExtensions()
 	 */
-	Markdown;
+	@Override
+	public List<String> getProbableExtensions() {
+		return null;
+	}
 
 }
