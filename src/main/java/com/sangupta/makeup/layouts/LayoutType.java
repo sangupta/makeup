@@ -27,6 +27,10 @@ package com.sangupta.makeup.layouts;
  */
 public enum LayoutType {
 	
-	Velocity;
-
+	AutoDetect,
+	
+	Velocity,
+	
+	DjangoLiquid;
+	
 }

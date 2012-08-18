@@ -23,6 +23,9 @@ package com.sangupta.makeup;
 
 import org.junit.Test;
 
+import com.sangupta.makeup.converters.Converter;
+import com.sangupta.makeup.converters.ConverterType;
+
 /**
  * 
  * @author sangupta
@@ -35,4 +38,9 @@ public class MakeupTest {
 		
 	}
 	
+	public static void main(String[] args) {
+		Converter c = Makeup.getConverter(ConverterType.Markdown);
+		String s = c.convert("```xml\n<hell>\n</hell>\n```", null);
+		System.out.println(s);
+	}
 }

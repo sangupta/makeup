@@ -23,8 +23,10 @@ package com.sangupta.makeup.layouts.velocity;
 
 import java.io.File;
 import java.io.StringWriter;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
@@ -40,68 +42,38 @@ import com.sangupta.makeup.tags.Tag;
  * Implementation of {@link Layout} based on Apache Velocity engine.
  * 
  * @author sangupta
- * @since 1.0
+ * @since 0.1
  */
 public class VelocityLayout implements Layout {
 	
 	private final VelocityEngine engine = new VelocityEngine();
+	
+	private final Set<String> layoutPaths = new HashSet<String>();
+	
+	private final Set<String> customDirectives = new HashSet<String>();
+	
+	private final Properties properties = new Properties();
+	
+	private static final String USER_DIRECTIVES_PROPERTY_NAME = "userdirective";
 	
 	/**
 	 * 
 	 * @see com.sangupta.makeup.Layout#initialize(java.io.File[], java.lang.Class<com.sangupta.makeup.Tag>[])
 	 */
 	public void initialize(File[] layoutFolders, Class<? extends Tag>[] customTags) {
-		Properties properties = new Properties();
 		
 		properties.setProperty(VelocityEngine.RESOURCE_LOADER, "file");
 		properties.setProperty("file" + VelocityEngine.RESOURCE_LOADER + ".class", FileResourceLoader.class.getName());
 		
-		// initialize folders
-		if(layoutFolders != null && layoutFolders.length > 0) {
-			String templatePath = null;
-			if(layoutFolders.length > 1) {
-				StringBuilder builder = new StringBuilder();
-				for(File folder : layoutFolders) {
-					builder.append(folder.getAbsolutePath()).append(",");
-				}
-				builder.deleteCharAt(builder.length() - 1);
-
-				templatePath = builder.toString();
-			} else {
-				templatePath = layoutFolders[0].getAbsolutePath();
-			}
-			
-			properties.setProperty(VelocityEngine.FILE_RESOURCE_LOADER_PATH, templatePath);
-		}
-
 		// initialize custom tags
-		if(customTags != null && customTags.length > 0) {
-			final String directives = getCustomTagsAsDirectives(customTags);
-			properties.setProperty("userdirective", directives);
-		}
+		registerCustomTags(customTags, false);
 
+		// initialize folders
+		addLayoutFolders(layoutFolders, false);
+		
+		// rebuild engine
 		engine.init(properties);
 	}
-
-	/**
-	 * Return a string representation of all tag classes
-	 * 
-	 * @return
-	 */
-	private String getCustomTagsAsDirectives(Class<? extends Tag>[] customTags) {
-		if(customTags == null || customTags.length == 0) {
-			return "";
-		}
-		
-		StringBuilder builder = new StringBuilder();
-		for(Class<? extends Tag> tag : customTags) {
-			builder.append(tag.getName()).append(",");
-		}
-		builder.deleteCharAt(builder.length() - 1);
-		
-		return builder.toString();		
-	}
-
 
 	/**
 	 *
@@ -109,8 +81,16 @@ public class VelocityLayout implements Layout {
 	 */
 	@Override
 	public boolean addLayoutFolder(File layoutFolder) {
-		// TODO Auto-generated method stub
-		return false;
+		if(layoutFolder == null) {
+			return false;
+		}
+		
+		this.layoutPaths.add(layoutFolder.getAbsolutePath());
+		
+		// re-init folder paths
+		reinitLayoutFolders(true);
+		
+		return true;
 	}
 
 	/**
@@ -119,8 +99,28 @@ public class VelocityLayout implements Layout {
 	 */
 	@Override
 	public boolean addLayoutFolders(File[] layoutFolders) {
-		// TODO Auto-generated method stub
-		return false;
+		return addLayoutFolders(layoutFolders, true);
+	}
+	
+	private boolean addLayoutFolders(File[] layoutFolders, boolean rebuildEngine) {
+		if(layoutFolders == null) {
+			return false;
+		}
+		
+		boolean success = true;
+		for(File folder : layoutFolders) {
+			if(folder == null) {
+				success = false;
+				continue;
+			}
+			
+			this.layoutPaths.add(folder.getAbsolutePath());
+		}
+		
+		// re-init folder paths
+		reinitLayoutFolders(rebuildEngine);
+		
+		return success;
 	}
 
 	/**
@@ -129,8 +129,16 @@ public class VelocityLayout implements Layout {
 	 */
 	@Override
 	public boolean registerCustomTag(Class<? extends Tag> tagClass) {
-		// TODO Auto-generated method stub
-		return false;
+		if(tagClass == null) {
+			return false;
+		}
+		
+		this.customDirectives.add(tagClass.getName());
+		
+		// reinit directives
+		registerCustomTagsAsDirectives(true);
+		
+		return true;
 	}
 
 	/**
@@ -139,8 +147,28 @@ public class VelocityLayout implements Layout {
 	 */
 	@Override
 	public boolean registerCustomTags(Class<? extends Tag>[] tagClasses) {
-		// TODO Auto-generated method stub
-		return false;
+		return registerCustomTags(tagClasses, true);
+	}
+	
+	private boolean registerCustomTags(Class<? extends Tag>[] tagClasses, boolean rebuildEngine) {
+		if(tagClasses == null) {
+			return false;
+		}
+		
+		boolean success = false;
+		for(Class<? extends Tag> tagClass : tagClasses) {
+			if(tagClass == null) {
+				success = false;
+				continue;
+			}
+			
+			this.customDirectives.add(tagClass.getName());
+		}
+		
+		//re-init custom directives
+		registerCustomTagsAsDirectives(rebuildEngine);
+		
+		return success;
 	}
 
 	/**
@@ -175,15 +203,62 @@ public class VelocityLayout implements Layout {
 
 	/**
 	 *
-	 * @see com.sangupta.makeup.Layout#layoutWithTemplate(java.lang.String, java.util.Map)
+	 * @see com.sangupta.makeup.Layout#layoutWithTemplateCode(java.lang.String, java.util.Map)
 	 */
 	@Override
-	public String layoutWithTemplate(String layoutCode,	Map<String, Object> model) {
+	public String layoutWithTemplateCode(String layoutCode,	Map<String, Object> model) {
 		VelocityContext context = new VelocityContext(model);
 		StringWriter stringWriter = new StringWriter();
 		engine.evaluate(context, stringWriter, "stringtemplate", layoutCode);
 		
 		return stringWriter.toString();
+	}
+	
+	/**
+	 * Re-initialize layout paths based on the ones that have been currently added.
+	 * 
+	 */
+	private void reinitLayoutFolders(boolean rebuildEngine) {
+		if(this.layoutPaths.size() == 0) {
+			return;
+			
+		}
+		StringBuilder builder = new StringBuilder();
+		for(String path : this.layoutPaths) {
+			builder.append(path).append(",");
+		}
+		
+		builder.deleteCharAt(builder.length() - 1);
+		
+		properties.setProperty(VelocityEngine.FILE_RESOURCE_LOADER_PATH, builder.toString());
+		
+		if(rebuildEngine) {
+			engine.init(properties);
+		}
+	}
+
+	/**
+	 * Return a string representation of all tag classes
+	 * 
+	 * @return
+	 */
+	private void registerCustomTagsAsDirectives(boolean rebuildEngine) {
+		if(this.customDirectives.size() == 0) {
+			return;
+		}
+		
+		StringBuilder builder = new StringBuilder();
+		for(String tag : this.customDirectives) {
+			builder.append(tag).append(",");
+		}
+		builder.deleteCharAt(builder.length() - 1);
+		
+		properties.setProperty(USER_DIRECTIVES_PROPERTY_NAME, builder.toString());
+		
+		// rebuild if needed
+		if(rebuildEngine) {
+			engine.init(properties);
+		}
 	}
 
 }

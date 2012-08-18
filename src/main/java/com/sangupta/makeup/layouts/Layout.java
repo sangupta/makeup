@@ -27,8 +27,11 @@ import java.util.Map;
 import com.sangupta.makeup.tags.Tag;
 
 /**
+ * Contract that all layout implementations must follow. This allows to
+ * switch between various layout implementation without changing the code.
+ * 
  * @author sangupta
- *
+ * @since 0.1
  */
 public interface Layout {
 	
@@ -44,6 +47,6 @@ public interface Layout {
 	
 	public String layout(String layoutName, Map<String, Object> model);
 	
-	public String layoutWithTemplate(String layoutCode, Map<String, Object> model);
+	public String layoutWithTemplateCode(String layoutCode, Map<String, Object> model);
 
 }
