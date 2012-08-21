@@ -28,11 +28,14 @@ import com.sangupta.jerry.http.WebResponse;
 import com.sangupta.makeup.tags.AbstractCustomTag;
 
 /**
+ * Custom tag that fetches the contents of the provided URL from the internet
+ * and appends the same in place.
+ *  
  * @author sangupta
- *
+ * @since 0.1.0
  */
 public class CurlTag extends AbstractCustomTag {
-
+	
 	@Override
 	public String getName() {
 		return "curl";

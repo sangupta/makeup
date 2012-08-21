@@ -22,11 +22,10 @@
 package com.sangupta.makeup;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
 import com.sangupta.makeup.converters.Converter;
 import com.sangupta.makeup.converters.ConverterType;
+import com.sangupta.makeup.converters.DoNothingConverter;
 import com.sangupta.makeup.converters.markdown.MarkdownConverter;
 import com.sangupta.makeup.layouts.Layout;
 import com.sangupta.makeup.layouts.LayoutType;
@@ -66,6 +65,21 @@ public class Makeup {
 	}
 
 	/**
+	 * Find the converter based on filename.
+	 * 
+	 * @param fileName
+	 * @return
+	 */
+	public static Converter getConverter(String fileName) {
+		// TODO: find converters using Converter.getProbableExtensions() method instead
+		if(fileName.endsWith(".md") || fileName.endsWith(".markdown")) {
+			return new MarkdownConverter();
+		}
+		
+		return new DoNothingConverter();
+	}
+
+	/**
 	 * Return a new instance of the layout for the given layout type.
 	 * 
 	 * @param layoutType
@@ -85,6 +99,38 @@ public class Makeup {
 	}
 	
 	/**
+	 * Return a list of all known custom tags that have been built into this library.
+	 * 
+	 * @return
+	 */
+	public static Class<? extends Tag>[] getKnownCustomTags() {
+		@SuppressWarnings("unchecked")
+		Class<? extends Tag>[] customTags = new Class[] {
+			CurlTag.class,
+			DateTag.class,
+			GoogleAnalyticsTag.class,
+			HrefTag.class,
+			MarkdownTag.class,
+			RemoveHeadingTag.class,
+			StatcounterTag.class
+		};
+		
+		return customTags;
+	}
+	
+	/**
+	 * Register all known custom tags that this library has built inside it
+	 * 
+	 * @param layout
+	 *            the layout over which the tags are registered
+	 * 
+	 * @throws <code>NullPointerException</code> if layout provided is null
+	 */
+	public static void registerKnownCustomTags(Layout layout) {
+		layout.registerCustomTags(getKnownCustomTags());
+	}
+
+	/**
 	 * Return a new instance of the layout for the given layout type, and
 	 * register all supported internal custom tags.
 	 * 
@@ -92,20 +138,10 @@ public class Makeup {
 	 * @param layoutFolders
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
 	public static Layout getLayoutWithInternalTags(LayoutType layoutType, File[] layoutFolders) {
 		Layout layout = getLayout(layoutType);
-		List<Class<? extends Tag>> tags = new ArrayList<Class<? extends Tag>>();
-
-		tags.add(DateTag.class);
-		tags.add(CurlTag.class);
-		tags.add(GoogleAnalyticsTag.class);
-		tags.add(HrefTag.class);
-		tags.add(MarkdownTag.class);
-		tags.add(RemoveHeadingTag.class);
-		tags.add(StatcounterTag.class);
 		
-		layout.initialize(layoutFolders, tags.toArray(new Class[] { } ));
+		layout.initialize(layoutFolders, getKnownCustomTags());
 		
 		return layout;
 	}
