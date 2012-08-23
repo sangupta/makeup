@@ -36,6 +36,7 @@ import com.sangupta.makeup.tags.custom.DateTag;
 import com.sangupta.makeup.tags.custom.GoogleAnalyticsTag;
 import com.sangupta.makeup.tags.custom.HrefTag;
 import com.sangupta.makeup.tags.custom.MarkdownTag;
+import com.sangupta.makeup.tags.custom.MonthTag;
 import com.sangupta.makeup.tags.custom.RemoveHeadingTag;
 import com.sangupta.makeup.tags.custom.StatcounterTag;
 
@@ -112,7 +113,8 @@ public class Makeup {
 			HrefTag.class,
 			MarkdownTag.class,
 			RemoveHeadingTag.class,
-			StatcounterTag.class
+			StatcounterTag.class,
+			MonthTag.class
 		};
 		
 		return customTags;
