@@ -55,8 +55,7 @@ public class HrefTag extends AbstractCustomTag {
 
 	@Override
 	public boolean doTag() throws IOException {
-		String url = null;
-		url = getArgument(0);
+		String url = getArgument(0);
 		
 		if(url != null) {
 			writer.write("<a href=\"");
