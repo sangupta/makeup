@@ -58,8 +58,8 @@ public class MonthTag extends AbstractCustomTag {
 
 	@Override
 	public boolean doTag() throws IOException {
-		int month = getArgument(0);
-		boolean zeroIndex = getArgument(1);
+		Integer month = getArgument(0);
+		Boolean zeroIndex = getArgument(1);
 		
 		if(!zeroIndex) {
 			month = month - 1;
